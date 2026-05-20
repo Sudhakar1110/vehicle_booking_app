@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Vehicle Booking App
 
 A complete Online Vehicle Booking Application built on **Frappe Framework** and **ERPNext v15**.
@@ -26,3 +27,6 @@ bench --site yoursite.com migrate
 
 ## License
 MIT
+=======
+# vehicle_booking_app
+>>>>>>> 67e5f7557b0df5d344690d4b479c2398183e6f1e
