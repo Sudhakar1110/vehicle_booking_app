@@ -1,0 +1,365 @@
+{% extends "templates/web.html" %}
+{% block title %}Book a Vehicle{% endblock %}
+{% block page_content %}
+<div id="vehicle-booking-app">
+  <div class="vb-hero">
+    <h1>Book Your Ride</h1>
+    <p>Safe, reliable, and comfortable vehicle booking</p>
+  </div>
+
+  <div class="vb-container">
+    <!-- Step 1: Select Category -->
+    <div class="vb-step" id="step-1">
+      <h2>Choose Vehicle Type</h2>
+      <div class="vb-categories" id="categories-grid">
+        <div class="vb-loading">Loading categories...</div>
+      </div>
+    </div>
+
+    <!-- Step 2: Trip Details -->
+    <div class="vb-step hidden" id="step-2">
+      <h2>Trip Details</h2>
+      <form id="trip-form" class="vb-form">
+        <div class="vb-form-row">
+          <div class="vb-form-group">
+            <label>Pickup Location *</label>
+            <input type="text" id="pickup_location" placeholder="Enter pickup address" required>
+          </div>
+          <div class="vb-form-group">
+            <label>Drop Location *</label>
+            <input type="text" id="drop_location" placeholder="Enter destination" required>
+          </div>
+        </div>
+        <div class="vb-form-row">
+          <div class="vb-form-group">
+            <label>Pickup Date & Time *</label>
+            <input type="datetime-local" id="pickup_datetime" required>
+          </div>
+          <div class="vb-form-group">
+            <label>Trip Type</label>
+            <select id="trip_type">
+              <option value="One Way">One Way</option>
+              <option value="Round Trip">Round Trip</option>
+              <option value="Local Package">Local Package</option>
+              <option value="Airport Transfer">Airport Transfer</option>
+            </select>
+          </div>
+        </div>
+        <div class="vb-form-row">
+          <div class="vb-form-group">
+            <label>No. of Passengers</label>
+            <input type="number" id="no_of_passengers" value="1" min="1" max="10">
+          </div>
+          <div class="vb-form-group">
+            <label>Estimated Distance (KM)</label>
+            <input type="number" id="estimated_distance" placeholder="Optional" min="0">
+          </div>
+        </div>
+        <div class="vb-form-group">
+          <label>Special Requirements</label>
+          <textarea id="special_requirements" rows="2" placeholder="Any special needs..."></textarea>
+        </div>
+        <div class="vb-fare-estimate" id="fare-estimate"></div>
+        <div class="vb-actions">
+          <button type="button" class="vb-btn vb-btn-secondary" onclick="goToStep(1)">← Back</button>
+          <button type="button" class="vb-btn vb-btn-primary" onclick="goToStep(3)">Continue →</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Step 3: Customer Info -->
+    <div class="vb-step hidden" id="step-3">
+      <h2>Your Details</h2>
+      <form id="customer-form" class="vb-form">
+        <div class="vb-form-row">
+          <div class="vb-form-group">
+            <label>Full Name *</label>
+            <input type="text" id="customer_name" placeholder="Your full name" required>
+          </div>
+          <div class="vb-form-group">
+            <label>Mobile Number *</label>
+            <input type="tel" id="customer_mobile" placeholder="+91 XXXXX XXXXX" required>
+          </div>
+        </div>
+        <div class="vb-form-group">
+          <label>Email Address</label>
+          <input type="email" id="customer_email" placeholder="you@email.com">
+        </div>
+        <div class="vb-summary" id="booking-summary"></div>
+        <div class="vb-actions">
+          <button type="button" class="vb-btn vb-btn-secondary" onclick="goToStep(2)">← Back</button>
+          <button type="button" class="vb-btn vb-btn-primary" onclick="submitBooking()">Confirm Booking</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Step 4: Confirmation -->
+    <div class="vb-step hidden" id="step-4">
+      <div class="vb-success">
+        <div class="vb-success-icon">✓</div>
+        <h2>Booking Confirmed!</h2>
+        <div id="booking-confirmation"></div>
+        <div class="vb-actions">
+          <button class="vb-btn vb-btn-primary" onclick="location.reload()">Book Another</button>
+          <button class="vb-btn vb-btn-secondary" onclick="trackBooking()">Track Booking</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Track Booking Section -->
+    <div class="vb-track-section">
+      <h3>Track Existing Booking</h3>
+      <div class="vb-track-form">
+        <input type="text" id="track-booking-id" placeholder="Enter Booking ID (e.g. VBO-2024-00001)">
+        <button class="vb-btn vb-btn-secondary" onclick="fetchBookingStatus()">Track</button>
+      </div>
+      <div id="track-result"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --vb-primary: #1a1a2e;
+  --vb-accent: #e94560;
+  --vb-accent2: #f5a623;
+  --vb-light: #f8f9fc;
+  --vb-white: #ffffff;
+  --vb-success: #27ae60;
+  --vb-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  --vb-radius: 16px;
+}
+
+#vehicle-booking-app { font-family: 'DM Sans', sans-serif; }
+.vb-hero {
+  background: linear-gradient(135deg, var(--vb-primary) 0%, #16213e 50%, #0f3460 100%);
+  color: white; text-align: center; padding: 80px 20px;
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+}
+.vb-hero h1 { font-family: 'Syne', sans-serif; font-size: 3rem; font-weight: 800; margin: 0 0 12px; }
+.vb-hero p { font-size: 1.2rem; opacity: 0.8; }
+.vb-container { max-width: 900px; margin: -40px auto 60px; padding: 0 20px; }
+.vb-step { background: white; border-radius: var(--vb-radius); padding: 40px; box-shadow: var(--vb-shadow); margin-bottom: 30px; }
+.vb-step h2 { font-family: 'Syne', sans-serif; font-size: 1.6rem; color: var(--vb-primary); margin: 0 0 24px; }
+.hidden { display: none; }
+.vb-categories { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+.vb-category-card {
+  border: 2px solid #eee; border-radius: 12px; padding: 20px; cursor: pointer;
+  transition: all 0.3s; text-align: center; position: relative;
+}
+.vb-category-card:hover, .vb-category-card.selected {
+  border-color: var(--vb-accent); box-shadow: 0 4px 20px rgba(233,69,96,0.2);
+  transform: translateY(-2px);
+}
+.vb-category-card.selected { background: #fff5f7; }
+.vb-category-card h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; margin: 8px 0 4px; color: var(--vb-primary); }
+.vb-category-card .price { color: var(--vb-accent); font-weight: 700; font-size: 0.95rem; }
+.vb-category-card .meta { font-size: 0.8rem; color: #666; margin-top: 4px; }
+.vb-category-icon { font-size: 2.5rem; margin-bottom: 8px; }
+.vb-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.vb-form-group { margin-bottom: 16px; }
+.vb-form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: #444; margin-bottom: 6px; }
+.vb-form-group input, .vb-form-group select, .vb-form-group textarea {
+  width: 100%; padding: 10px 14px; border: 1.5px solid #ddd; border-radius: 8px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.95rem; transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+.vb-form-group input:focus, .vb-form-group select:focus, .vb-form-group textarea:focus {
+  outline: none; border-color: var(--vb-accent);
+}
+.vb-fare-estimate {
+  background: #f8f9fc; border-radius: 10px; padding: 16px; margin: 16px 0;
+  border-left: 4px solid var(--vb-accent);
+}
+.vb-fare-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.9rem; }
+.vb-fare-total { font-weight: 700; font-size: 1.1rem; border-top: 1px solid #ddd; padding-top: 8px; margin-top: 4px; color: var(--vb-accent); }
+.vb-summary {
+  background: linear-gradient(135deg, #f8f9fc, #fff); border: 1px solid #eee;
+  border-radius: 12px; padding: 20px; margin: 16px 0;
+}
+.vb-summary h4 { font-family: 'Syne', sans-serif; color: var(--vb-primary); margin: 0 0 12px; }
+.vb-summary-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.9rem; border-bottom: 1px solid #f0f0f0; }
+.vb-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+.vb-btn { padding: 12px 28px; border-radius: 8px; border: none; font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.vb-btn-primary { background: var(--vb-accent); color: white; }
+.vb-btn-primary:hover { background: #d63651; transform: translateY(-1px); }
+.vb-btn-secondary { background: #f0f0f0; color: #333; }
+.vb-btn-secondary:hover { background: #e0e0e0; }
+.vb-success { text-align: center; padding: 20px; }
+.vb-success-icon { width: 80px; height: 80px; background: var(--vb-success); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; margin: 0 auto 20px; }
+.vb-success h2 { font-family: 'Syne', sans-serif; color: var(--vb-success); }
+.vb-track-section { background: white; border-radius: var(--vb-radius); padding: 30px; box-shadow: var(--vb-shadow); margin-top: 30px; }
+.vb-track-section h3 { font-family: 'Syne', sans-serif; color: var(--vb-primary); margin: 0 0 16px; }
+.vb-track-form { display: flex; gap: 10px; }
+.vb-track-form input { flex: 1; padding: 10px 14px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 0.95rem; }
+.vb-loading { text-align: center; color: #999; padding: 40px; }
+.vb-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
+.badge-confirmed { background: #e3f2fd; color: #1565c0; }
+.badge-completed { background: #e8f5e9; color: #2e7d32; }
+.badge-cancelled { background: #ffebee; color: #c62828; }
+.badge-draft { background: #f5f5f5; color: #616161; }
+#track-result { margin-top: 16px; }
+.vb-track-card { background: #f8f9fc; border-radius: 10px; padding: 16px; border-left: 4px solid var(--vb-accent); }
+@media (max-width: 600px) {
+  .vb-form-row { grid-template-columns: 1fr; }
+  .vb-hero h1 { font-size: 2rem; }
+  .vb-track-form { flex-direction: column; }
+}
+</style>
+
+<script>
+let selectedCategory = null;
+let bookingData = {};
+let lastBookingId = null;
+
+// Load categories on page load
+document.addEventListener('DOMContentLoaded', loadCategories);
+
+async function loadCategories() {
+  try {
+    const res = await fetch('/api/method/vehicle_booking.api.booking.get_vehicle_categories');
+    const data = await res.json();
+    renderCategories(data.message || []);
+  } catch(e) {
+    document.getElementById('categories-grid').innerHTML = '<p>Failed to load categories. Please refresh.</p>';
+  }
+}
+
+function renderCategories(categories) {
+  const icons = { 'Sedan': '🚗', 'SUV': '🚙', 'Mini': '🚕', 'Tempo': '🚐', 'Luxury': '🏎️', 'Bus': '🚌', 'Bike': '🏍️' };
+  const grid = document.getElementById('categories-grid');
+  if (!categories.length) { grid.innerHTML = '<p>No vehicle categories available.</p>'; return; }
+  grid.innerHTML = categories.map(cat => `
+    <div class="vb-category-card" onclick="selectCategory('${cat.name}', this)" data-name="${cat.name}">
+      <div class="vb-category-icon">${icons[cat.category_name] || '🚗'}</div>
+      <h3>${cat.category_name}</h3>
+      <div class="price">₹${cat.base_fare} base</div>
+      <div class="meta">₹${cat.per_km_charge}/km · ${cat.max_passengers} seats</div>
+      ${cat.ac_available ? '<div class="meta">❄️ AC</div>' : ''}
+    </div>
+  `).join('');
+}
+
+function selectCategory(name, el) {
+  document.querySelectorAll('.vb-category-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedCategory = name;
+  setTimeout(() => goToStep(2), 400);
+}
+
+function goToStep(step) {
+  if (step === 2 && !selectedCategory) { alert('Please select a vehicle category'); return; }
+  if (step === 3) {
+    const pickup = document.getElementById('pickup_location').value;
+    const drop = document.getElementById('drop_location').value;
+    const dt = document.getElementById('pickup_datetime').value;
+    if (!pickup || !drop || !dt) { alert('Please fill all required trip fields'); return; }
+    bookingData = {
+      vehicle_category: selectedCategory,
+      pickup_location: pickup,
+      drop_location: drop,
+      pickup_datetime: dt,
+      trip_type: document.getElementById('trip_type').value,
+      no_of_passengers: document.getElementById('no_of_passengers').value,
+      estimated_distance: document.getElementById('estimated_distance').value,
+      special_requirements: document.getElementById('special_requirements').value
+    };
+    renderSummary();
+  }
+  document.querySelectorAll('.vb-step').forEach((s, i) => s.classList.toggle('hidden', i !== step - 1));
+  window.scrollTo(0, 0);
+}
+
+async function renderSummary() {
+  let fareHtml = '';
+  try {
+    const params = new URLSearchParams({ vehicle_category: selectedCategory, distance: bookingData.estimated_distance || 0 });
+    const res = await fetch(`/api/method/vehicle_booking.api.booking.estimate_fare?${params}`);
+    const data = await res.json();
+    const fare = data.message || {};
+    fareHtml = `
+      <div class="vb-fare-row"><span>Base Fare</span><span>₹${(fare.base_fare||0).toFixed(2)}</span></div>
+      <div class="vb-fare-row"><span>Distance Charge</span><span>₹${(fare.distance_charge||0).toFixed(2)}</span></div>
+      <div class="vb-fare-row"><span>GST (5%)</span><span>₹${(fare.tax_amount||0).toFixed(2)}</span></div>
+      <div class="vb-fare-row vb-fare-total"><span>Total Estimate</span><span>₹${(fare.total_fare||0).toFixed(2)}</span></div>
+    `;
+    document.getElementById('fare-estimate').innerHTML = '<h4 style="margin:0 0 8px;font-family:Syne,sans-serif;">Fare Estimate</h4>' + fareHtml;
+  } catch(e) {}
+
+  document.getElementById('booking-summary').innerHTML = `
+    <h4>Booking Summary</h4>
+    <div class="vb-summary-row"><span>Category</span><span>${selectedCategory}</span></div>
+    <div class="vb-summary-row"><span>From</span><span>${bookingData.pickup_location}</span></div>
+    <div class="vb-summary-row"><span>To</span><span>${bookingData.drop_location}</span></div>
+    <div class="vb-summary-row"><span>Pickup</span><span>${new Date(bookingData.pickup_datetime).toLocaleString()}</span></div>
+    <div class="vb-summary-row"><span>Trip Type</span><span>${bookingData.trip_type}</span></div>
+    <div class="vb-summary-row"><span>Passengers</span><span>${bookingData.no_of_passengers}</span></div>
+  `;
+}
+
+async function submitBooking() {
+  const name = document.getElementById('customer_name').value;
+  const mobile = document.getElementById('customer_mobile').value;
+  const email = document.getElementById('customer_email').value;
+  if (!name || !mobile) { alert('Please enter your name and mobile number'); return; }
+
+  const payload = { ...bookingData, customer_name: name, customer_mobile: mobile, customer_email: email };
+  try {
+    const res = await fetch('/api/method/vehicle_booking.api.booking.create_booking', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Frappe-CSRF-Token': frappe.csrf_token || '' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    const result = data.message || {};
+    if (result.success) {
+      lastBookingId = result.booking_id;
+      document.getElementById('booking-confirmation').innerHTML = `
+        <p><strong>Booking ID:</strong> ${result.booking_id}</p>
+        <p><strong>Total Fare:</strong> ₹${(result.total_fare||0).toFixed(2)}</p>
+        <p>We will contact you shortly to confirm your booking.</p>
+      `;
+      goToStep(4);
+    } else {
+      alert('Booking failed: ' + (result.error || 'Unknown error'));
+    }
+  } catch(e) {
+    alert('Something went wrong. Please try again.');
+  }
+}
+
+function trackBooking() {
+  if (lastBookingId) {
+    document.getElementById('track-booking-id').value = lastBookingId;
+    fetchBookingStatus();
+    document.querySelector('.vb-track-section').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+async function fetchBookingStatus() {
+  const id = document.getElementById('track-booking-id').value.trim();
+  if (!id) { alert('Please enter a booking ID'); return; }
+  try {
+    const res = await fetch(`/api/method/vehicle_booking.api.booking.get_booking_status?booking_id=${id}`);
+    const data = await res.json();
+    const b = data.message || {};
+    if (b.error) { document.getElementById('track-result').innerHTML = `<p style="color:red">${b.error}</p>`; return; }
+    const statusColors = { Confirmed: 'badge-confirmed', Completed: 'badge-completed', Cancelled: 'badge-cancelled', Draft: 'badge-draft' };
+    document.getElementById('track-result').innerHTML = `
+      <div class="vb-track-card">
+        <strong>${b.booking_id}</strong> &nbsp;
+        <span class="vb-badge ${statusColors[b.status] || ''}">${b.status}</span>
+        ${b.driver_name ? `<div style="margin-top:8px">🧑‍✈️ Driver: <strong>${b.driver_name}</strong> ${b.driver_mobile ? `(${b.driver_mobile})` : ''}</div>` : ''}
+        <div style="margin-top:4px">💰 Total: ₹${b.total_fare || 0} | Paid: ₹${b.paid_amount || 0}
+          <span class="vb-badge ${b.payment_status === 'Paid' ? 'badge-completed' : 'badge-draft'}">${b.payment_status}</span>
+        </div>
+      </div>
+    `;
+  } catch(e) {
+    document.getElementById('track-result').innerHTML = '<p style="color:red">Failed to fetch status.</p>';
+  }
+}
+</script>
+{% endblock %}

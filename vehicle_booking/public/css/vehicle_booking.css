@@ -1,0 +1,4 @@
+.vb-dashboard-card {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: white; border-radius: 12px; padding: 20px; margin-bottom: 16px;
+}

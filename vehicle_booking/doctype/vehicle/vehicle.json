@@ -1,0 +1,37 @@
+{
+  "name": "Vehicle",
+  "doctype": "DocType",
+  "module": "Vehicle Booking",
+  "is_submittable": 0,
+  "track_changes": 1,
+  "title_field": "vehicle_name",
+  "search_fields": "license_plate, vehicle_name",
+  "fields": [
+    {"fieldname": "vehicle_name", "fieldtype": "Data", "label": "Vehicle Name", "reqd": 1, "in_list_view": 1},
+    {"fieldname": "license_plate", "fieldtype": "Data", "label": "License Plate", "reqd": 1, "in_list_view": 1, "unique": 1},
+    {"fieldname": "vehicle_category", "fieldtype": "Link", "label": "Vehicle Category", "options": "Vehicle Category", "reqd": 1, "in_list_view": 1},
+    {"fieldname": "col_break1", "fieldtype": "Column Break"},
+    {"fieldname": "make", "fieldtype": "Data", "label": "Make (Brand)", "reqd": 1},
+    {"fieldname": "model", "fieldtype": "Data", "label": "Model", "reqd": 1},
+    {"fieldname": "year", "fieldtype": "Int", "label": "Year", "reqd": 1},
+    {"fieldname": "color", "fieldtype": "Data", "label": "Color"},
+    {"fieldname": "section_break1", "fieldtype": "Section Break", "label": "Status & Assignment"},
+    {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "Available\nBooked\nIn Service\nMaintenance\nRetired", "default": "Available", "in_list_view": 1},
+    {"fieldname": "current_driver", "fieldtype": "Link", "label": "Current Driver", "options": "Driver"},
+    {"fieldname": "current_location", "fieldtype": "Data", "label": "Current Location"},
+    {"fieldname": "col_break2", "fieldtype": "Column Break"},
+    {"fieldname": "odometer", "fieldtype": "Float", "label": "Odometer (KM)"},
+    {"fieldname": "fuel_type", "fieldtype": "Select", "label": "Fuel Type", "options": "Petrol\nDiesel\nCNG\nElectric\nHybrid"},
+    {"fieldname": "insurance_expiry", "fieldtype": "Date", "label": "Insurance Expiry Date"},
+    {"fieldname": "pollution_expiry", "fieldtype": "Date", "label": "Pollution Certificate Expiry"},
+    {"fieldname": "section_break2", "fieldtype": "Section Break", "label": "Images"},
+    {"fieldname": "vehicle_image", "fieldtype": "Attach Image", "label": "Vehicle Image"},
+    {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+  ],
+  "permissions": [
+    {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1},
+    {"role": "Vehicle Booking Manager", "read": 1, "write": 1, "create": 1},
+    {"role": "Vehicle Booking User", "read": 1},
+    {"role": "Guest", "read": 1}
+  ]
+}

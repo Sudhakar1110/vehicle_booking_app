@@ -1,0 +1,25 @@
+{
+  "doctype": "Workspace",
+  "name": "Vehicle Booking",
+  "label": "Vehicle Booking",
+  "module": "Vehicle Booking",
+  "icon": "vehicle",
+  "is_standard": 1,
+  "links": [
+    {
+      "type": "Card Break", "label": "Booking",
+      "links": [
+        {"label": "Vehicle Booking Order", "type": "Link", "link_type": "DocType", "link_to": "Vehicle Booking Order"},
+        {"label": "Vehicle Booking Summary", "type": "Link", "link_type": "Report", "link_to": "Vehicle Booking Summary"}
+      ]
+    },
+    {
+      "type": "Card Break", "label": "Masters",
+      "links": [
+        {"label": "Vehicle", "type": "Link", "link_type": "DocType", "link_to": "Vehicle"},
+        {"label": "Driver", "type": "Link", "link_type": "DocType", "link_to": "Driver"},
+        {"label": "Vehicle Category", "type": "Link", "link_type": "DocType", "link_to": "Vehicle Category"}
+      ]
+    }
+  ]
+}

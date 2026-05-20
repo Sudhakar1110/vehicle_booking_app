@@ -1,0 +1,27 @@
+{
+  "name": "Vehicle Category",
+  "doctype": "DocType",
+  "module": "Vehicle Booking",
+  "is_submittable": 0,
+  "track_changes": 1,
+  "fields": [
+    {"fieldname": "category_name", "fieldtype": "Data", "label": "Category Name", "reqd": 1, "in_list_view": 1},
+    {"fieldname": "description", "fieldtype": "Small Text", "label": "Description"},
+    {"fieldname": "image", "fieldtype": "Attach Image", "label": "Category Image"},
+    {"fieldname": "base_fare", "fieldtype": "Currency", "label": "Base Fare", "reqd": 1},
+    {"fieldname": "per_km_charge", "fieldtype": "Currency", "label": "Per KM Charge", "reqd": 1},
+    {"fieldname": "per_hour_charge", "fieldtype": "Currency", "label": "Per Hour Charge"},
+    {"fieldname": "max_passengers", "fieldtype": "Int", "label": "Max Passengers", "default": 4},
+    {"fieldname": "luggage_capacity", "fieldtype": "Int", "label": "Luggage Capacity (bags)"},
+    {"fieldname": "ac_available", "fieldtype": "Check", "label": "AC Available", "default": 1},
+    {"fieldname": "features", "fieldtype": "Small Text", "label": "Features (comma-separated)"},
+    {"fieldname": "is_active", "fieldtype": "Check", "label": "Is Active", "default": 1}
+  ],
+  "permissions": [
+    {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1},
+    {"role": "Vehicle Booking Manager", "read": 1, "write": 1, "create": 1},
+    {"role": "Guest", "read": 1}
+  ],
+  "title_field": "category_name",
+  "search_fields": "category_name"
+}

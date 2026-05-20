@@ -1,0 +1,4 @@
+[
+  { "doctype": "Role", "role_name": "Vehicle Booking Manager", "desk_access": 1 },
+  { "doctype": "Role", "role_name": "Vehicle Booking User", "desk_access": 1 }
+]

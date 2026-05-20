@@ -1,0 +1,12 @@
+{
+  "name": "Vehicle Booking Summary",
+  "doctype": "Report",
+  "report_type": "Script Report",
+  "ref_doctype": "Vehicle Booking Order",
+  "is_standard": "Yes",
+  "module": "Vehicle Booking",
+  "roles": [
+    {"role": "System Manager"},
+    {"role": "Vehicle Booking Manager"}
+  ]
+}
